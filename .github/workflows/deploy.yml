@@ -23,4 +23,5 @@ jobs:
           ssh -o StrictHostKeyChecking=no spectres@${{ secrets.DEPLOY_HOST }} << 'EOF'
             cd /home/spectres/Quift/Backend
             git pull origin main
+            # To Do
           EOF
