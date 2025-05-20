@@ -1,15 +1,20 @@
+version: '3.8'
+
 services:
   php:
-    build: .
-    container_name: crm-php
-    networks:
-      - crm-net
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: backend-php
+    working_dir: /var/www
     volumes:
-      - .:/var/www:delegated  
+      - .:/var/www:delegated
+    networks:
+      - backend-net
 
   nginx:
     image: nginx:alpine
-    container_name: crm-nginx
+    container_name: backend-nginx
     ports:
       - "8081:80"
     volumes:
@@ -18,8 +23,8 @@ services:
     depends_on:
       - php
     networks:
-      - crm-net
+      - backend-net
 
 networks:
-  crm-net:
-    external: true  # this need to be added to ansible playbook
+  backend-net:
+    external: true  # Falls du ein vordefiniertes Netzwerk z. B. mit Ansible erzeugst

@@ -1,23 +1,29 @@
-# --- Build stage ---
-FROM composer:2 as composer
+# --- Build stage: Install dependencies ---
+FROM composer:2 AS composer
 WORKDIR /app
+
+# Nur Composer-Dateien kopieren und Abhängigkeiten installieren
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --optimize-autoloader
 
-# --- Runtime stage ---
+# --- Runtime stage: PHP mit FPM ---
 FROM php:8.2-fpm
+
 WORKDIR /var/www
 
-# PHP Extensions
+# Systemabhängigkeiten und PHP-Extensions installieren
 RUN apt-get update && apt-get install -y \
     libzip-dev libonig-dev unzip git \
-    && docker-php-ext-install pdo pdo_mysql zip mbstring
+    && docker-php-ext-install pdo pdo_mysql zip mbstring \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy app files
+# App-Code kopieren
 COPY . .
 
-# Copy vendor from build stage
+# Vendor-Ordner aus Build-Stufe übernehmen
 COPY --from=composer /app/vendor ./vendor
 
-# Permissions
+# Besitzer korrekt setzen (optional, je nach Umgebung)
 RUN chown -R www-data:www-data /var/www
+
+# Exponieren ist nicht nötig – handled durch docker-compose
